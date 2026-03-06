@@ -14,6 +14,7 @@
     input, select { padding: 5px; margin: 5px; }
     #calendar { background-color: #fff; padding: 10px; border: 1px solid #ccc; }
     .event { margin: 5px 0; padding: 5px; background-color: #cce5ff; border-radius: 4px; }
+    .checkboxes label { margin-right: 10px; display: inline-block; }
   </style>
 </head>
 <body>
@@ -27,7 +28,8 @@
         <th>Name</th>
         <th>Dienstgrad</th>
         <th>Eintrittsdatum</th>
-        <th>Beförderungsdatum</th>
+        <th>Letzte Beförderung</th>
+        <th>Ausbildungen</th>
         <th>Aktionen</th>
       </tr>
     </thead>
@@ -39,7 +41,17 @@
   <input type="text" id="name" placeholder="Name">
   <input type="text" id="rank" placeholder="Dienstgrad">
   <input type="date" id="entryDate" placeholder="Eintrittsdatum">
-  <input type="date" id="promotionDate" placeholder="Beförderungsdatum">
+  <input type="date" id="promotionDate" placeholder="Letzte Beförderung">
+  <div class="checkboxes">
+    <label><input type="checkbox" value="GAB 01"> GAB 01</label>
+    <label><input type="checkbox" value="GAB 02"> GAB 02</label>
+    <label><input type="checkbox" value="Aktenschulung"> Aktenschulung</label>
+    <label><input type="checkbox" value="Beweissicherung"> Beweissicherung</label>
+    <label><input type="checkbox" value="Leitstellenausbildung"> Leitstellenausbildung</label>
+    <label><input type="checkbox" value="Einsatzleitung"> Einsatzleitung</label>
+    <label><input type="checkbox" value="Verhandlungsführung"> Verhandlungsführung</label>
+    <label><input type="checkbox" value="Overwatch"> Overwatch</label>
+  </div>
   <button onclick="addOfficer()">Hinzufügen</button>
 
   <h2>Ausbildungskalender</h2>
@@ -52,23 +64,31 @@
   </div>
 
   <script>
-    let officers = [];
-    let events = [];
+    let officers = JSON.parse(localStorage.getItem("officers")) || [];
+    let events = JSON.parse(localStorage.getItem("events")) || [];
+
+    function saveData() {
+      localStorage.setItem("officers", JSON.stringify(officers));
+      localStorage.setItem("events", JSON.stringify(events));
+    }
 
     function renderTable() {
       const tbody = document.querySelector("#officerTable tbody");
       tbody.innerHTML = "";
       officers.forEach((officer, index) => {
+        const coursesText = officer.courses && officer.courses.length ? officer.courses.join(", ") : "Keine Ausbildung";
         const row = document.createElement("tr");
         row.innerHTML = `
           <td><input type="text" value="${officer.name}" onchange="updateOfficer(${index}, 'name', this.value)"></td>
           <td><input type="text" value="${officer.rank}" onchange="updateOfficer(${index}, 'rank', this.value)"></td>
           <td><input type="date" value="${officer.entryDate}" onchange="updateOfficer(${index}, 'entryDate', this.value)"></td>
           <td><input type="date" value="${officer.promotionDate}" onchange="updateOfficer(${index}, 'promotionDate', this.value)"></td>
+          <td>${coursesText}</td>
           <td><button onclick="deleteOfficer(${index})">Löschen</button></td>
         `;
         tbody.appendChild(row);
       });
+      saveData();
     }
 
     function addOfficer() {
@@ -76,13 +96,17 @@
       const rank = document.getElementById("rank").value;
       const entryDate = document.getElementById("entryDate").value;
       const promotionDate = document.getElementById("promotionDate").value;
+      const checkboxes = document.querySelectorAll(".checkboxes input[type='checkbox']");
+      const courses = [];
+      checkboxes.forEach(cb => { if(cb.checked) courses.push(cb.value); });
       if(name && rank && entryDate) {
-        officers.push({name, rank, entryDate, promotionDate});
+        officers.push({name, rank, entryDate, promotionDate, courses});
         renderTable();
         document.getElementById("name").value = "";
         document.getElementById("rank").value = "";
         document.getElementById("entryDate").value = "";
         document.getElementById("promotionDate").value = "";
+        checkboxes.forEach(cb => cb.checked = false);
       } else {
         alert("Bitte alle Pflichtfelder ausfüllen (Name, Dienstgrad, Eintrittsdatum).");
       }
@@ -90,6 +114,7 @@
 
     function updateOfficer(index, field, value) {
       officers[index][field] = value;
+      renderTable();
     }
 
     function deleteOfficer(index) {
@@ -108,6 +133,7 @@
         div.innerHTML = `${event.date} - ${event.name} <button onclick="deleteEvent(${index})">Löschen</button>`;
         eventsList.appendChild(div);
       });
+      saveData();
     }
 
     function addEvent() {
@@ -129,6 +155,9 @@
         renderEvents();
       }
     }
+
+    renderTable();
+    renderEvents();
   </script>
 
 </body>
