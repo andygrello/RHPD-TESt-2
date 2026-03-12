@@ -1,164 +1,556 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RHPD Officer Verwaltung</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f2f2f2; }
-    h1, h2 { color: #003366; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background-color: #fff; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #003366; color: white; }
-    button { padding: 5px 10px; margin: 2px; cursor: pointer; }
-    input, select { padding: 5px; margin: 5px; }
-    #calendar { background-color: #fff; padding: 10px; border: 1px solid #ccc; }
-    .event { margin: 5px 0; padding: 5px; background-color: #cce5ff; border-radius: 4px; }
-    .checkboxes label { margin-right: 10px; display: inline-block; }
-  </style>
+<meta charset="UTF-8">
+<title>Rockford Hills Police Department</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#0b1e3a;
+color:white;
+}
+
+header{
+display:flex;
+align-items:center;
+gap:15px;
+padding:20px;
+background:#08152b;
+font-size:26px;
+font-weight:bold;
+}
+
+header img{
+height:70px;
+}
+
+nav{
+text-align:center;
+margin:20px;
+}
+
+button{
+padding:10px 18px;
+margin:5px;
+border:none;
+background:#1f4ea3;
+color:white;
+font-size:15px;
+cursor:pointer;
+border-radius:5px;
+}
+
+button:hover{
+background:#356ad6;
+}
+
+.section{
+display:none;
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+color:black;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+}
+
+th{
+background:#003366;
+color:white;
+}
+
+input,select,textarea{
+padding:6px;
+margin:5px;
+}
+
+#loginBox{
+text-align:center;
+margin-top:150px;
+}
+
+.record{
+background:#102b52;
+padding:10px;
+margin:10px 0;
+border-radius:6px;
+}
+
+.record img{
+max-width:200px;
+margin-top:5px;
+}
+
+/* Kalender */
+
+#calendar td{
+height:90px;
+vertical-align:top;
+background:white;
+color:black;
+font-size:12px;
+}
+
+.dayNumber{
+font-weight:bold;
+}
+
+.trainingEvent{
+background:#1f4ea3;
+color:white;
+padding:2px;
+margin-top:3px;
+border-radius:3px;
+font-size:11px;
+}
+
+</style>
 </head>
+
 <body>
 
-  <h1>RHPD Officer Verwaltung</h1>
+<header>
 
-  <h2>Personalliste</h2>
-  <table id="officerTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Dienstgrad</th>
-        <th>Eintrittsdatum</th>
-        <th>Letzte Beförderung</th>
-        <th>Ausbildungen</th>
-        <th>Aktionen</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
+<img src="/mnt/data/Screenshot 2026-03-07 002654.png">
 
-  <h3>Neuen Officer hinzufügen</h3>
-  <input type="text" id="name" placeholder="Name">
-  <input type="text" id="rank" placeholder="Dienstgrad">
-  <input type="date" id="entryDate" placeholder="Eintrittsdatum">
-  <input type="date" id="promotionDate" placeholder="Letzte Beförderung">
-  <div class="checkboxes">
-    <label><input type="checkbox" value="GAB 01"> GAB 01</label>
-    <label><input type="checkbox" value="GAB 02"> GAB 02</label>
-    <label><input type="checkbox" value="Aktenschulung"> Aktenschulung</label>
-    <label><input type="checkbox" value="Beweissicherung"> Beweissicherung</label>
-    <label><input type="checkbox" value="Leitstellenausbildung"> Leitstellenausbildung</label>
-    <label><input type="checkbox" value="Einsatzleitung"> Einsatzleitung</label>
-    <label><input type="checkbox" value="Verhandlungsführung"> Verhandlungsführung</label>
-    <label><input type="checkbox" value="Overwatch"> Overwatch</label>
-  </div>
-  <button onclick="addOfficer()">Hinzufügen</button>
+Rockford Hills Police Department
 
-  <h2>Ausbildungskalender</h2>
-  <div id="calendar">
-    <h3>Termine</h3>
-    <div id="eventsList"></div>
-    <input type="text" id="eventName" placeholder="Ausbildungs-Titel">
-    <input type="date" id="eventDate">
-    <button onclick="addEvent()">Termin hinzufügen</button>
-  </div>
+<button onclick="logout()" style="margin-left:auto">Abmelden</button>
 
-  <script>
-    let officers = JSON.parse(localStorage.getItem("officers")) || [];
-    let events = JSON.parse(localStorage.getItem("events")) || [];
+</header>
 
-    function saveData() {
-      localStorage.setItem("officers", JSON.stringify(officers));
-      localStorage.setItem("events", JSON.stringify(events));
-    }
+<div id="loginBox">
 
-    function renderTable() {
-      const tbody = document.querySelector("#officerTable tbody");
-      tbody.innerHTML = "";
-      officers.forEach((officer, index) => {
-        const coursesText = officer.courses && officer.courses.length ? officer.courses.join(", ") : "Keine Ausbildung";
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td><input type="text" value="${officer.name}" onchange="updateOfficer(${index}, 'name', this.value)"></td>
-          <td><input type="text" value="${officer.rank}" onchange="updateOfficer(${index}, 'rank', this.value)"></td>
-          <td><input type="date" value="${officer.entryDate}" onchange="updateOfficer(${index}, 'entryDate', this.value)"></td>
-          <td><input type="date" value="${officer.promotionDate}" onchange="updateOfficer(${index}, 'promotionDate', this.value)"></td>
-          <td>${coursesText}</td>
-          <td><button onclick="deleteOfficer(${index})">Löschen</button></td>
-        `;
-        tbody.appendChild(row);
-      });
-      saveData();
-    }
+<h2>System Anmeldung</h2>
 
-    function addOfficer() {
-      const name = document.getElementById("name").value;
-      const rank = document.getElementById("rank").value;
-      const entryDate = document.getElementById("entryDate").value;
-      const promotionDate = document.getElementById("promotionDate").value;
-      const checkboxes = document.querySelectorAll(".checkboxes input[type='checkbox']");
-      const courses = [];
-      checkboxes.forEach(cb => { if(cb.checked) courses.push(cb.value); });
-      if(name && rank && entryDate) {
-        officers.push({name, rank, entryDate, promotionDate, courses});
-        renderTable();
-        document.getElementById("name").value = "";
-        document.getElementById("rank").value = "";
-        document.getElementById("entryDate").value = "";
-        document.getElementById("promotionDate").value = "";
-        checkboxes.forEach(cb => cb.checked = false);
-      } else {
-        alert("Bitte alle Pflichtfelder ausfüllen (Name, Dienstgrad, Eintrittsdatum).");
-      }
-    }
+<input type="text" id="username" placeholder="Benutzername"><br>
+<input type="password" id="password" placeholder="Passwort"><br>
 
-    function updateOfficer(index, field, value) {
-      officers[index][field] = value;
-      renderTable();
-    }
+<button onclick="login()">Anmelden</button>
 
-    function deleteOfficer(index) {
-      if(confirm("Diesen Officer wirklich löschen?")) {
-        officers.splice(index, 1);
-        renderTable();
-      }
-    }
+</div>
 
-    function renderEvents() {
-      const eventsList = document.getElementById("eventsList");
-      eventsList.innerHTML = "";
-      events.forEach((event, index) => {
-        const div = document.createElement("div");
-        div.className = "event";
-        div.innerHTML = `${event.date} - ${event.name} <button onclick="deleteEvent(${index})">Löschen</button>`;
-        eventsList.appendChild(div);
-      });
-      saveData();
-    }
+<div id="system" style="display:none">
 
-    function addEvent() {
-      const name = document.getElementById("eventName").value;
-      const date = document.getElementById("eventDate").value;
-      if(name && date) {
-        events.push({name, date});
-        renderEvents();
-        document.getElementById("eventName").value = "";
-        document.getElementById("eventDate").value = "";
-      } else {
-        alert("Bitte Ausbildungs-Titel und Datum angeben.");
-      }
-    }
+<nav>
 
-    function deleteEvent(index) {
-      if(confirm("Diesen Termin wirklich löschen?")) {
-        events.splice(index, 1);
-        renderEvents();
-      }
-    }
+<button onclick="openPage('home')">Startseite</button>
+<button onclick="openPage('personal')">Personalblatt</button>
+<button onclick="openPage('files')">Personalakten</button>
+<button onclick="openPage('training')">Ausbildungskalender</button>
 
-    renderTable();
-    renderEvents();
-  </script>
+</nav>
+
+<div id="home" class="section" style="display:block">
+
+<h2>Willkommen beim RHPD Verwaltungssystem</h2>
+<p>Officer Verwaltung • Personalakten • Ausbildungssystem</p>
+
+</div>
+
+<div id="personal" class="section">
+
+<h1>Officer Verwaltung</h1>
+
+<table id="officerTable">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Dienstgrad</th>
+<th>Unit</th>
+<th>Eintritt</th>
+<th>Letzte Beförderung</th>
+<th>Aktion</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<h3>Officer hinzufügen</h3>
+
+<input id="name" placeholder="Name">
+
+<select id="rank">
+<option>Rookie</option>
+<option>Officer I</option>
+<option>Officer II</option>
+<option>Officer III</option>
+<option>Sergeant</option>
+<option>Lieutenant</option>
+<option>Captain</option>
+<option>Commander</option>
+<option>Chief of Police</option>
+</select>
+
+<select id="unit">
+<option>Patrol Service</option>
+<option>Special Tactics and Weapons</option>
+<option>Crime Investigation Unit</option>
+</select>
+
+<input type="date" id="entryDate">
+<input type="date" id="promotionDate">
+
+<button onclick="addOfficer()">Officer hinzufügen</button>
+
+</div>
+
+<div id="files" class="section">
+
+<h1>Personalakten</h1>
+
+<select id="officerSelect" onchange="loadFile()"></select>
+
+<h3>Neuer Eintrag</h3>
+
+<textarea id="noteText" placeholder="Kommentar / Abmeldung / Einsatzbericht"></textarea><br>
+
+<input type="file" id="imageUpload"><br>
+
+<button onclick="addRecord()">Eintrag speichern</button>
+
+<h3>Akteneinträge</h3>
+
+<div id="records"></div>
+
+</div>
+
+<div id="training" class="section">
+
+<h1>Ausbildungskalender</h1>
+
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:15px">
+
+<button onclick="prevMonth()">◀</button>
+
+<h2 id="calendarTitle"></h2>
+
+<button onclick="nextMonth()">▶</button>
+
+</div>
+
+<table id="calendar">
+
+<thead>
+<tr>
+<th>Mo</th>
+<th>Di</th>
+<th>Mi</th>
+<th>Do</th>
+<th>Fr</th>
+<th>Sa</th>
+<th>So</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<h3>Neue Ausbildung</h3>
+
+<input type="date" id="trainingDate">
+<input type="time" id="trainingTime">
+
+<select id="trainingName">
+
+<option>GAB 01</option>
+<option>GAB 02</option>
+<option>Aktenschulung</option>
+<option>Beweissicherung</option>
+<option>Leitstellenausbildung</option>
+<option>Einsatzleitung</option>
+<option>Verhandlungsführung</option>
+<option>Overwatch</option>
+
+</select>
+
+<input id="trainingLocation" placeholder="Ort">
+<input id="trainer" placeholder="Ausbilder">
+
+<button onclick="addTraining()">Termin hinzufügen</button>
+
+</div>
+
+</div>
+
+<script>
+
+function login(){
+if(username.value==="admin" && password.value==="rhpdpd"){
+loginBox.style.display="none"
+system.style.display="block"
+}else{
+alert("Falsche Zugangsdaten")
+}
+}
+
+function logout(){
+location.reload()
+}
+
+function openPage(page){
+document.querySelectorAll(".section").forEach(s=>s.style.display="none")
+document.getElementById(page).style.display="block"
+}
+
+let officers=JSON.parse(localStorage.getItem("officers"))||[]
+let trainings=JSON.parse(localStorage.getItem("trainings"))||[]
+let files=JSON.parse(localStorage.getItem("files"))||{}
+
+function save(){
+localStorage.setItem("officers",JSON.stringify(officers))
+localStorage.setItem("trainings",JSON.stringify(trainings))
+localStorage.setItem("files",JSON.stringify(files))
+}
+
+/* OFFICERS */
+
+function renderOfficers(){
+
+const body=document.querySelector("#officerTable tbody")
+body.innerHTML=""
+
+officers.forEach((o,i)=>{
+
+const row=document.createElement("tr")
+
+row.innerHTML=`
+
+<td>${o.name}</td>
+<td>${o.rank}</td>
+<td>${o.unit}</td>
+<td>${o.entryDate}</td>
+<td>${o.promotionDate}</td>
+
+<td>
+<button onclick="deleteOfficer(${i})">Löschen</button>
+</td>
+
+`
+
+body.appendChild(row)
+
+})
+
+updateOfficerSelect()
+
+save()
+
+}
+
+function updateOfficerSelect(){
+
+const sel=document.getElementById("officerSelect")
+sel.innerHTML=""
+
+officers.forEach(o=>{
+
+const opt=document.createElement("option")
+opt.value=o.name
+opt.textContent=o.name+" - "+o.rank
+
+sel.appendChild(opt)
+
+})
+
+}
+
+function addOfficer(){
+
+officers.push({
+name:name.value,
+rank:rank.value,
+unit:unit.value,
+entryDate:entryDate.value,
+promotionDate:promotionDate.value
+})
+
+renderOfficers()
+
+}
+
+function deleteOfficer(i){
+officers.splice(i,1)
+renderOfficers()
+}
+
+/* PERSONALAKTEN */
+
+function loadFile(){
+
+const officer=officerSelect.value
+const box=document.getElementById("records")
+
+box.innerHTML=""
+
+if(!files[officer]) return
+
+files[officer].forEach(r=>{
+
+const div=document.createElement("div")
+div.className="record"
+
+div.innerHTML=`<div>${r.text}</div>${r.img?`<img src="${r.img}">`:""}`
+
+box.appendChild(div)
+
+})
+
+}
+
+function addRecord(){
+
+const officer=officerSelect.value
+const text=noteText.value
+const file=imageUpload.files[0]
+
+if(!files[officer]) files[officer]=[]
+
+if(file){
+
+const reader=new FileReader()
+
+reader.onload=function(){
+
+files[officer].push({text:text,img:reader.result})
+
+save()
+loadFile()
+
+}
+
+reader.readAsDataURL(file)
+
+}else{
+
+files[officer].push({text:text})
+
+save()
+loadFile()
+
+}
+
+noteText.value=""
+imageUpload.value=""
+
+}
+
+/* KALENDER */
+
+let currentMonth=new Date().getMonth()
+let currentYear=new Date().getFullYear()
+
+function renderCalendar(){
+
+const body=document.querySelector("#calendar tbody")
+body.innerHTML=""
+
+const title=document.getElementById("calendarTitle")
+
+const date=new Date(currentYear,currentMonth)
+
+title.innerText=date.toLocaleString("de-DE",{month:"long",year:"numeric"})
+
+const firstDay=(new Date(currentYear,currentMonth,1).getDay()+6)%7
+const days=new Date(currentYear,currentMonth+1,0).getDate()
+
+let row=document.createElement("tr")
+
+for(let i=0;i<firstDay;i++){
+row.appendChild(document.createElement("td"))
+}
+
+for(let day=1;day<=days;day++){
+
+if(row.children.length===7){
+body.appendChild(row)
+row=document.createElement("tr")
+}
+
+const cell=document.createElement("td")
+
+cell.innerHTML=`<div class="dayNumber">${day}</div>`
+
+const dateStr=currentYear+"-"+String(currentMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0")
+
+trainings.forEach(t=>{
+
+if(t.date===dateStr){
+
+const div=document.createElement("div")
+div.className="trainingEvent"
+div.innerText=(t.time ? t.time+" " : "") + t.name
+
+cell.appendChild(div)
+
+}
+
+})
+
+row.appendChild(cell)
+
+}
+
+body.appendChild(row)
+
+}
+
+function prevMonth(){
+currentMonth--
+if(currentMonth<0){currentMonth=11;currentYear--}
+renderCalendar()
+}
+
+function nextMonth(){
+currentMonth++
+if(currentMonth>11){currentMonth=0;currentYear++}
+renderCalendar()
+}
+
+function addTraining(){
+
+const date=trainingDate.value
+const time=trainingTime.value
+const name=trainingName.value
+
+if(date===""){
+alert("Datum fehlt")
+return
+}
+
+trainings.push({
+date:date,
+time:time,
+name:name,
+location:trainingLocation.value,
+trainer:trainer.value
+})
+
+save()
+renderCalendar()
+
+}
+
+renderOfficers()
+renderCalendar()
+
+</script>
 
 </body>
 </html>
+```
