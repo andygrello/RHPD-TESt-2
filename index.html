@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -238,9 +239,7 @@ Rockford Hills Police Department
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px">
 
 <button onclick="prevMonth()">◀</button>
-
 <h2 id="calendarTitle"></h2>
-
 <button onclick="nextMonth()">▶</button>
 
 </div>
@@ -292,10 +291,23 @@ Rockford Hills Police Department
 
 <script>
 
+let officers=JSON.parse(localStorage.getItem("officers"))||[]
+let trainings=JSON.parse(localStorage.getItem("trainings"))||[]
+let files=JSON.parse(localStorage.getItem("files"))||{}
+
+function save(){
+localStorage.setItem("officers",JSON.stringify(officers))
+localStorage.setItem("trainings",JSON.stringify(trainings))
+localStorage.setItem("files",JSON.stringify(files))
+}
+
 function login(){
-if(username.value==="admin" && password.value==="rhpdpd"){
-loginBox.style.display="none"
-system.style.display="block"
+const user=document.getElementById("username").value
+const pass=document.getElementById("password").value
+
+if(user==="admin" && pass==="rhpdpd"){
+document.getElementById("loginBox").style.display="none"
+document.getElementById("system").style.display="block"
 }else{
 alert("Falsche Zugangsdaten")
 }
@@ -308,16 +320,6 @@ location.reload()
 function openPage(page){
 document.querySelectorAll(".section").forEach(s=>s.style.display="none")
 document.getElementById(page).style.display="block"
-}
-
-let officers=JSON.parse(localStorage.getItem("officers"))||[]
-let trainings=JSON.parse(localStorage.getItem("trainings"))||[]
-let files=JSON.parse(localStorage.getItem("files"))||{}
-
-function save(){
-localStorage.setItem("officers",JSON.stringify(officers))
-localStorage.setItem("trainings",JSON.stringify(trainings))
-localStorage.setItem("files",JSON.stringify(files))
 }
 
 function renderOfficers(){
@@ -336,10 +338,7 @@ row.innerHTML=`
 <td>${o.unit}</td>
 <td>${o.entryDate}</td>
 <td>${o.promotionDate}</td>
-
-<td>
-<button onclick="deleteOfficer(${i})">Löschen</button>
-</td>
+<td><button onclick="deleteOfficer(${i})">Löschen</button></td>
 
 `
 
@@ -348,9 +347,40 @@ body.appendChild(row)
 })
 
 updateOfficerSelect()
-
 save()
 
+}
+
+function addOfficer(){
+
+const name=document.getElementById("name").value.trim()
+const rank=document.getElementById("rank").value
+const unit=document.getElementById("unit").value
+const entry=document.getElementById("entryDate").value
+const promo=document.getElementById("promotionDate").value
+
+if(name===""){
+alert("Name fehlt")
+return
+}
+
+officers.push({
+name:name,
+rank:rank,
+unit:unit,
+entryDate:entry,
+promotionDate:promo
+})
+
+document.getElementById("name").value=""
+
+renderOfficers()
+
+}
+
+function deleteOfficer(i){
+officers.splice(i,1)
+renderOfficers()
 }
 
 function updateOfficerSelect(){
@@ -370,28 +400,9 @@ sel.appendChild(opt)
 
 }
 
-function addOfficer(){
-
-officers.push({
-name:name.value,
-rank:rank.value,
-unit:unit.value,
-entryDate:entryDate.value,
-promotionDate:promotionDate.value
-})
-
-renderOfficers()
-
-}
-
-function deleteOfficer(i){
-officers.splice(i,1)
-renderOfficers()
-}
-
 function loadFile(){
 
-const officer=officerSelect.value
+const officer=document.getElementById("officerSelect").value
 const box=document.getElementById("records")
 
 box.innerHTML=""
@@ -413,9 +424,9 @@ box.appendChild(div)
 
 function addRecord(){
 
-const officer=officerSelect.value
-const text=noteText.value
-const file=imageUpload.files[0]
+const officer=document.getElementById("officerSelect").value
+const text=document.getElementById("noteText").value
+const file=document.getElementById("imageUpload").files[0]
 
 if(!files[officer]) files[officer]=[]
 
@@ -443,12 +454,10 @@ loadFile()
 
 }
 
-noteText.value=""
-imageUpload.value=""
+document.getElementById("noteText").value=""
+document.getElementById("imageUpload").value=""
 
 }
-
-/* KALENDER */
 
 let currentMonth=new Date().getMonth()
 let currentYear=new Date().getFullYear()
@@ -494,7 +503,6 @@ row=document.createElement("tr")
 }
 
 const cell=document.createElement("td")
-
 cell.innerHTML=`<div class="dayNumber">${day}</div>`
 
 const dateStr=currentYear+"-"+String(currentMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0")
@@ -539,9 +547,9 @@ renderCalendar()
 
 function addTraining(){
 
-const date=trainingDate.value
-const time=trainingTime.value
-const name=trainingName.value
+const date=document.getElementById("trainingDate").value
+const time=document.getElementById("trainingTime").value
+const name=document.getElementById("trainingName").value
 
 if(date===""){
 alert("Datum fehlt")
@@ -553,8 +561,8 @@ id:Date.now(),
 date:date,
 time:time,
 name:name,
-location:trainingLocation.value,
-trainer:trainer.value
+location:document.getElementById("trainingLocation").value,
+trainer:document.getElementById("trainer").value
 })
 
 save()
@@ -569,3 +577,4 @@ renderCalendar()
 
 </body>
 </html>
+```
