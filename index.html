@@ -25,7 +25,7 @@ font-weight:bold;
 }
 
 header img{
-height:70px;
+height:65px;
 }
 
 nav{
@@ -133,6 +133,7 @@ Rockford Hills Police Department
 
 </header>
 
+
 <div id="loginBox">
 
 <h2>System Anmeldung</h2>
@@ -143,6 +144,7 @@ Rockford Hills Police Department
 <button onclick="login()">Anmelden</button>
 
 </div>
+
 
 <div id="system" style="display:none">
 
@@ -155,12 +157,14 @@ Rockford Hills Police Department
 
 </nav>
 
+
 <div id="home" class="section" style="display:block">
 
 <h2>Willkommen beim RHPD Verwaltungssystem</h2>
 <p>Officer Verwaltung • Personalakten • Ausbildungssystem</p>
 
 </div>
+
 
 <div id="personal" class="section">
 
@@ -212,6 +216,7 @@ Rockford Hills Police Department
 
 </div>
 
+
 <div id="files" class="section">
 
 <h1>Personalakten</h1>
@@ -231,6 +236,7 @@ Rockford Hills Police Department
 <div id="records"></div>
 
 </div>
+
 
 <div id="training" class="section">
 
@@ -289,11 +295,13 @@ Rockford Hills Police Department
 
 </div>
 
+
 <script>
 
 let officers=JSON.parse(localStorage.getItem("officers"))||[]
 let trainings=JSON.parse(localStorage.getItem("trainings"))||[]
 let files=JSON.parse(localStorage.getItem("files"))||{}
+
 
 function save(){
 localStorage.setItem("officers",JSON.stringify(officers))
@@ -301,26 +309,40 @@ localStorage.setItem("trainings",JSON.stringify(trainings))
 localStorage.setItem("files",JSON.stringify(files))
 }
 
+
 function login(){
+
 const user=document.getElementById("username").value
 const pass=document.getElementById("password").value
 
 if(user==="admin" && pass==="rhpdpd"){
+
 document.getElementById("loginBox").style.display="none"
 document.getElementById("system").style.display="block"
+
 }else{
+
 alert("Falsche Zugangsdaten")
+
 }
+
 }
+
 
 function logout(){
 location.reload()
 }
 
+
 function openPage(page){
+
 document.querySelectorAll(".section").forEach(s=>s.style.display="none")
 document.getElementById(page).style.display="block"
+
 }
+
+
+/* OFFICERS */
 
 function renderOfficers(){
 
@@ -333,12 +355,15 @@ const row=document.createElement("tr")
 
 row.innerHTML=`
 
-<td>${o.name}</td>
-<td>${o.rank}</td>
-<td>${o.unit}</td>
-<td>${o.entryDate}</td>
-<td>${o.promotionDate}</td>
-<td><button onclick="deleteOfficer(${i})">Löschen</button></td>
+<td>${o.name || "-"}</td>
+<td>${o.rank || "-"}</td>
+<td>${o.unit || "-"}</td>
+<td>${o.entryDate || "-"}</td>
+<td>${o.promotionDate || "-"}</td>
+
+<td>
+<button onclick="deleteOfficer(${i})">Löschen</button>
+</td>
 
 `
 
@@ -351,37 +376,54 @@ save()
 
 }
 
+
 function addOfficer(){
 
-const name=document.getElementById("name").value.trim()
-const rank=document.getElementById("rank").value
-const unit=document.getElementById("unit").value
-const entry=document.getElementById("entryDate").value
-const promo=document.getElementById("promotionDate").value
+const nameInput=document.getElementById("name")
+const rankInput=document.getElementById("rank")
+const unitInput=document.getElementById("unit")
+const entryInput=document.getElementById("entryDate")
+const promoInput=document.getElementById("promotionDate")
 
-if(name===""){
+const name=nameInput.value.trim()
+
+if(!name){
+
 alert("Name fehlt")
 return
+
 }
 
 officers.push({
+
 name:name,
-rank:rank,
-unit:unit,
-entryDate:entry,
-promotionDate:promo
+rank:rankInput.value,
+unit:unitInput.value,
+entryDate:entryInput.value,
+promotionDate:promoInput.value
+
 })
 
-document.getElementById("name").value=""
+nameInput.value=""
+entryInput.value=""
+promoInput.value=""
 
 renderOfficers()
 
 }
+
 
 function deleteOfficer(i){
+
+if(confirm("Officer löschen?")){
+
 officers.splice(i,1)
 renderOfficers()
+
 }
+
+}
+
 
 function updateOfficerSelect(){
 
@@ -399,6 +441,9 @@ sel.appendChild(opt)
 })
 
 }
+
+
+/* PERSONALAKTEN */
 
 function loadFile(){
 
@@ -421,6 +466,7 @@ box.appendChild(div)
 })
 
 }
+
 
 function addRecord(){
 
@@ -459,8 +505,12 @@ document.getElementById("imageUpload").value=""
 
 }
 
+
+/* KALENDER */
+
 let currentMonth=new Date().getMonth()
 let currentYear=new Date().getFullYear()
+
 
 function deleteTraining(id){
 
@@ -474,6 +524,7 @@ renderCalendar()
 }
 
 }
+
 
 function renderCalendar(){
 
@@ -503,6 +554,7 @@ row=document.createElement("tr")
 }
 
 const cell=document.createElement("td")
+
 cell.innerHTML=`<div class="dayNumber">${day}</div>`
 
 const dateStr=currentYear+"-"+String(currentMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0")
@@ -533,6 +585,7 @@ body.appendChild(row)
 
 }
 
+
 function prevMonth(){
 currentMonth--
 if(currentMonth<0){currentMonth=11;currentYear--}
@@ -545,6 +598,7 @@ if(currentMonth>11){currentMonth=0;currentYear++}
 renderCalendar()
 }
 
+
 function addTraining(){
 
 const date=document.getElementById("trainingDate").value
@@ -552,23 +606,30 @@ const time=document.getElementById("trainingTime").value
 const name=document.getElementById("trainingName").value
 
 if(date===""){
+
 alert("Datum fehlt")
 return
+
 }
 
 trainings.push({
+
 id:Date.now(),
 date:date,
 time:time,
 name:name,
 location:document.getElementById("trainingLocation").value,
 trainer:document.getElementById("trainer").value
+
 })
 
 save()
 renderCalendar()
 
 }
+
+
+/* START */
 
 renderOfficers()
 renderCalendar()
